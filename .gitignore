@@ -1,0 +1,5 @@
+config.mak
+mjpeg_webserver
+mjpeg_webserver.exe
+build/*.o
+
