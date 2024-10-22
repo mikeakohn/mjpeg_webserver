@@ -1,0 +1,216 @@
+#!/usr/bin/env bash
+
+PREFIX=/usr/local
+CC=gcc
+COMPILER_PREFIX=
+FLAGS=""
+CFLAGS="-Wall"
+LDFLAGS=""
+CONFIG_EXT=""
+WITH_MMAP="no"
+
+OBJS="avi_parse.o avi_play.o config.o file_io.o general.o mime_types.o network_io.o http_headers.o server.o url_utils.o user.o"
+
+targetos=`uname -s`
+case $targetos in
+MINGW*)
+PREFIX="/c/Program Files/mjpeg_webserver"
+FLAGS="${FLAGS} -DWINDOWS -mwindows"
+CONFIG_EXT=".exe"
+;;
+esac
+
+show_help()
+{
+  echo
+  echo "Usage: ./configure [options]"
+  echo
+  echo "  --help                    list options"
+  echo "  --cflags=CFLAGS           extra compiler flags"
+  echo "  --ldflags=LDFLAGS         extra linker flags"
+  echo "  --prefix=PATH             path to install to"
+  echo "  --compiler-prefix=PREFIX  for cross-compilers"
+  echo "  --enable-debug            compile in debug code"
+  if [ "${WITH_MMAP}" == "no" ]
+  then
+    echo "  --with-mmap               compile with mmap() support"
+  else
+    echo "  --without-mmap            compile without mmap() support"
+  fi
+  echo "  --enable-v4l2             compile in video4linux2 support"
+  echo "  --enable-vfw              compile in video4windows support"
+  echo "  --enable-cgi              compile in cgi support"
+  echo "  --enable-plugins          compile in plugin support"
+  echo
+
+  exit
+}
+
+test_compiler()
+{
+  cat >config.c <<EOF
+  main() { }
+EOF
+
+  ${1} -o config config.c >>config.log 2>&1
+}
+
+test_lib()
+{
+  cat >config.c <<EOF
+main() { }
+EOF
+
+  ${COMPILER_PREFIX}${CC} -o config config.c $1 >>config.log 2>&1
+}
+
+test_include()
+{
+  cat >config.c <<EOF
+#include <${1}>
+main() { }
+EOF
+
+  ${COMPILER_PREFIX}${CC} -o config config.c >>config.log 2>&1
+}
+
+toupper()
+{
+  echo "$@" | tr '[a-z]' '[A-Z]'
+}
+
+instr()
+{
+  for s in $2; do
+    case "${s}" in
+    *${1}*) return 0 
+    ;;
+    esac
+  done
+
+  return 1
+}
+
+cleanup()
+{
+  if [ -e config.c ]; then rm config.c; fi
+  if [ -e config.exe ]; then rm config.exe; fi
+  if [ -e config ]; then rm config; fi
+  if [ -e config.log ]; then rm config.log; fi
+}
+
+for option in $@; do
+
+  optval="${option#*=}"
+
+  case "$option" in
+  --help) show_help
+  ;;
+  --cflags=*) CFLAGS="${CFLAGS} $optval"
+  ;;
+  --ldflags=*) LDFLAGS="${LDFLAGS} $optval"
+  ;;
+  --compiler-prefix=*) COMPILER_PREFIX="$optval"
+  ;;
+  --with-mmap)  WITH_MMAP="yes"
+  ;;
+  --without-mmap)  WITH_MMAP="no"
+  ;;
+  --enable-debug)
+      FLAGS="${FLAGS} -DDEBUG"
+      CFLAGS="${CFLAGS} -g"
+  ;;
+  --enable-v4l2)
+      FLAGS="${FLAGS} -DENABLE_CAPTURE -DV4L2 -DJPEG_LIB";
+      OBJS="${OBJS} jpeg_compress.o v4l2_capture.o"
+  ;;
+  --enable-vfw)
+      FLAGS="${FLAGS} -DENABLE_CAPTURE -DVFW";
+      OBJS="${OBJS} jpeg_compress.o vfw_capture.o"
+  ;;
+  --enable-cgi)
+      FLAGS="${FLAGS} -DENABLE_CGI";
+  ;;
+  --enable-plugins)
+      FLAGS="${FLAGS} -DENABLE_PLUGINS";
+      if test_lib "-ldl"; then LDFLAGS="${LDFLAGS} -ldl"; fi
+  ;;
+  esac
+
+done
+
+if test_compiler "gcc"
+then
+  CC="gcc"
+elif test_compiler "cc"
+then
+  CC="cc"
+fi
+
+if test_lib "-lpthread"; then LDFLAGS="${LDFLAGS} -lpthread"; fi
+if test_lib "-lc_r"; then LDFLAGS="${LDFLAGS} -lc_r"; fi
+if test_lib "-lsocket"; then LDFLAGS="${LDFLAGS} -lsocket"; fi
+if test_lib "-lnsl"; then LDFLAGS="${LDFLAGS} -lnsl"; fi
+if test_lib "-lws2_32"; then LDFLAGS="${LDFLAGS} -lws2_32"; fi
+if test_lib "-lwinmm"; then LDFLAGS="${LDFLAGS} -lwinmm"; fi
+if test_lib "-luser32"; then LDFLAGS="${LDFLAGS} -luser32"; fi
+if test_lib "-lvfw32"; then LDFLAGS="${LDFLAGS} -lvfw32"; fi
+#if ! test_include "crypt.h"; then FLAGS="${FLAGS} -DNO_CRYPT_DOT_H"; fi
+
+if ! instr "-O" "${CFLAGS}"; then CFLAGS="${CFLAGS} -O2"; fi
+if ! instr "-DDEBUG" "${FLAGS}"; then CFLAGS="${CFLAGS} -s"; fi
+
+if ! instr "WINDOWS" "${FLAGS}"
+then
+  a=`${COMPILER_PREFIX}${CC} --version`
+
+  if instr "mingw" "${a}"
+  then
+    #PREFIX="/c/Program Files/mjpeg_webserver"
+    FLAGS="${FLAGS} -DWINDOWS -mwindows"
+    CONFIG_EXT=".exe"
+  fi
+fi
+
+if instr "-DV4L2" "${FLAGS}"
+then
+  if test_lib "-ljpeg"
+  then
+    LDFLAGS="${LDFLAGS} -ljpeg"
+  else
+    echo "libjpeg is required for compiling video4linux2"
+    exit 1
+  fi
+fi
+
+if [ "${WITH_MMAP}" == "yes" ]
+then
+  FLAGS="${FLAGS} -DWITH_MMAP"
+fi
+
+cleanup
+
+echo "# Generated include file" > config.mak
+echo >> config.mak
+echo "PREFIX=${PREFIX}" >> config.mak
+echo "CC=${CC}" >> config.mak
+echo "COMPILER_PREFIX=${COMPILER_PREFIX}" >> config.mak
+echo "FLAGS=${FLAGS}" >> config.mak
+echo "LDFLAGS=${LDFLAGS}" >> config.mak
+echo "CFLAGS=${CFLAGS}" >> config.mak
+echo "CONFIG_EXT=${CONFIG_EXT}" >> config.mak
+echo "OBJS=${OBJS}" >> config.mak
+echo >> config.mak
+
+echo
+echo "Configuration:"
+echo "  Install to: ${PREFIX}"
+echo "    Compiler: ${COMPILER_PREFIX}${CC}"
+echo "       Flags: ${FLAGS}"
+echo "     LDFLAGS: ${LDFLAGS}"
+echo "      CFLAGS: ${CFLAGS}"
+echo
+echo "Now type: make"
+echo
+
+
