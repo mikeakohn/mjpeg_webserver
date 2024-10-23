@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
@@ -21,7 +22,73 @@
 #include "globals.h"
 #include "http_headers.h"
 #include "mime_types.h"
+#include "avi_parse.h"
 #include "user.h"
+
+int avi_init(const char *filename)
+{
+  FILE *in;
+
+  in = fopen(filename,"rb");
+
+  if (in == 0)
+  {
+    printf("Cannot open AVI file: %s\n", filename);
+    return -1;
+  }
+
+  printf("Indexing AVI file %d: '%s'\n", video_count, filename);
+
+  memset(&video[video_count], 0, sizeof(Video));
+
+  video[video_count].filename = malloc(strlen(filename) + 1);
+
+  strcpy(video[video_count].filename, filename);
+  parse_riff(in, &video[video_count]);
+
+  /* gettimeofday(&video[video_count].tv_start, DST_NONE); */
+  gettimeofday(&video[video_count].tv_start, 0);
+
+  video[video_count].tv_total.tv_sec =
+    video[video_count].total_frames / video[video_count].fps;
+  video[video_count].tv_total.tv_usec =
+    (int)((((double)video[video_count].total_frames / (double)video[video_count].fps) - (double)video[video_count].tv_total.tv_sec) * (double)1000000);
+
+#ifdef DEBUG
+  if (debug == 1)
+  {
+    printf("fps=%d total_frames=%d sec=%d usec=%d\n",
+      video[video_count].fps,
+      video[video_count].total_frames,
+      (int)video[video_count].tv_total.tv_sec,
+      (int)video[video_count].tv_total.tv_usec);
+  }
+#endif
+
+#ifdef WITH_MMAP
+  fseek(in,0,SEEK_END);
+  video[video_count].file_len = ftell(in);
+#ifndef WINDOWS
+  video[video_count].fd = open(video[video_count].filename, O_RDONLY);
+  video[video_count].mem =
+    (uint8_t *)mmap(NULL, video[video_count].file_len, PROT_READ, MAP_SHARED, video[video_count].fd, 0);
+#else
+  video[video_count].fd =
+    CreateFile(video[video_count].filename, FILE_READ_DATA, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, NULL);
+  // Security.nLength=sizeof(Security);
+  // Security.lpSecurityDescriptor = NULL;
+  video[video_count].mem_handle =
+    CreateFileMapping(video[video_count].fd, NULL, PAGE_READONLY, 0, video[video_count].file_len, NULL);
+  video[video_count].mem =
+    (uint8_t *)MapViewOfFile(video[video_count].mem_handle, FILE_MAP_READ, 0, 0, video[video_count].file_len);
+#endif
+#endif
+
+  video_count++;
+  fclose(in);
+
+  return 0;
+}
 
 int avi_play_calc_frame(User *user)
 {

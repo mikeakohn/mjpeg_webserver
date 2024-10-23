@@ -14,6 +14,7 @@
 
 #include "user.h"
 
+int avi_init(const char *filename);
 int avi_play_calc_frame(User *user);
 
 #endif
