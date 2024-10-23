@@ -138,7 +138,7 @@ void server_thread(ThreadContext *thread_context)
         FD_SET(users[r]->socketid, &readset);
 
         if (msock < users[r]->socketid) { msock = users[r]->socketid; }
-        if (users[r]->in_ptr<users[r]->in_len ||
+        if (users[r]->in_ptr < users[r]->in_len ||
             users[r]->state == STATE_SEND_FILE)
         {
           dirty_buffer = 1;
@@ -190,14 +190,12 @@ void server_thread(ThreadContext *thread_context)
     for (id = thread_num; id < config->maxconn; id = id + MAX_USER_THREADS)
     {
       errno = 0;
+
       if (users[id] == 0) { continue; }
       if (users[id]->inuse != 1) { continue; }
 
 #if 0
-printf("Checking line %d     %d %d %d\n", id,
-  users[id]->in_ptr,
-  users[id]->slen,
-  users[id]->ptr);
+printf("Checking line %d     %d\n", id, users[id]->in_ptr);
 printf("state=%d  need_header=%d (%d)\n",
   users[id]->state,
   users[id]->need_header,id);
@@ -208,7 +206,8 @@ printf("state=%d  need_header=%d (%d)\n",
         /* Do nothing */
       }
         else
-      if (users[id]->in_ptr<users[id]->in_len || FD_ISSET(users[id]->socketid,&readset))
+      if (users[id]->in_ptr < users[id]->in_len ||
+          FD_ISSET(users[id]->socketid, &readset))
       {
         r = buffered_read(id);
         if (r < 0) { user_disconnect(users[id]); continue; }
@@ -303,9 +302,9 @@ printf("state=%d  need_header=%d (%d)\n",
           if (users[id]->in == -1)
           {
 #ifndef WINDOWS
-            users[id]->in = open(video[users[id]->video_num].filename,O_RDONLY);
+            users[id]->in = open(video[users[id]->video_num].filename, O_RDONLY);
 #else
-            users[id]->in = open(video[users[id]->video_num].filename,O_RDONLY|_O_BINARY);
+            users[id]->in = open(video[users[id]->video_num].filename, O_RDONLY|_O_BINARY);
 #endif
 
             if (users[id]->in == -1)
@@ -407,17 +406,17 @@ if (debug == 1)
       param = command + r;
       r = strlen(param) - 1;
 
-      while (param[r]==' ' || param[r]=='\r' || param[r]=='\n')
+      while (param[r] == ' ' || param[r] == '\r' || param[r] == '\n')
       {
         param[r--] = 0;
       }
 
-      if (strcasecmp(command,"get") == 0)
+      if (strcasecmp(command, "get") == 0)
       {
         users[id]->state = STATE_HEADERS;
         users[id]->method = METHOD_GET;
 
-        r = conv_num(param+ 1);
+        r = conv_num(param + 1);
 
         if (r != users[id]->video_num && users[id]->in != -1)
         {

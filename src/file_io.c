@@ -238,7 +238,7 @@ int file_close(User *user)
 
   int in = user->in;
 
-  return close(in);
+  user->in = -1;
 
 #ifdef ENABLE_CGI
   if ((user->mime_type & MIME_IS_CGI ) != 0)
@@ -247,7 +247,7 @@ int file_close(User *user)
   }
 #endif
 
-  user->in = -1;
+  return close(in);
 }
 
 int read_int32(FILE *in)
