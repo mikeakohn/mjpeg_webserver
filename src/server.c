@@ -57,7 +57,7 @@
 #include "video.h"
 
 int sockfd;
-int video_count;
+int video_count = 0;
 char *runas_user = NULL;
 char *runas_group = NULL;
 User **users;
@@ -483,7 +483,6 @@ int server_run(Config *config)
   pthread_t pid;
 #endif
 
-  video_count = 0;
   uptime = time(NULL);
 
 #ifndef WINDOWS

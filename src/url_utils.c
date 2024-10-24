@@ -102,7 +102,7 @@ int parse_querystring(User *user, char *filename, Alias *curr_alias)
   ptr++;
 
   r = 0;
-  state=0;
+  state = 0;
 
   while (1)
   {
