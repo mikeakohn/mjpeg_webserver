@@ -41,13 +41,16 @@
 #include "capture.h"
 #endif
 
+#include "alias.h"
 #include "avi_play.h"
+#include "cgi_handler.h"
 #include "config.h"
 #include "file_io.h"
 #include "general.h"
 #include "http_headers.h"
 #include "mime_types.h"
 #include "network_io.h"
+#include "plugin.h"
 #include "server.h"
 #include "user.h"
 #include "version.h"
@@ -63,12 +66,12 @@ Video video[100];
 int debug;
 uint32_t uptime;
 uint32_t server_flags;
-struct alias_t *alias;
+Alias *alias;
 #ifdef ENABLE_CGI
-struct cgi_handler_t *cgi_handler;
+CgiHandler *cgi_handler;
 #endif
 #ifdef ENABLE_PLUGINS
-struct plugin_t *plugin;
+Plugin *plugin;
 #endif
 
 typedef struct ThreadContext

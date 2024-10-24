@@ -18,25 +18,28 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "alias.h"
+#include "cgi_handler.h"
 #include "config.h"
 #include "file_io.h"
 #include "globals.h"
 #include "mime_types.h"
+#include "plugin.h"
 #include "user.h"
 #include "url_utils.h"
 
 int file_open(User *user, Config *config, char *filename)
 {
-  struct alias_t *curr_alias;
+  Alias *curr_alias;
   struct stat file_stat;
   char *querystring = NULL;
 #ifdef ENABLE_CGI
   char handler_file[2048];
-  struct cgi_handler_t *curr_handler;
+  CgiHandler *curr_handler;
   int t;
 #endif
 #ifdef ENABLE_PLUGINS
-  struct plugin_t *curr_plugin;
+  Plugin *curr_plugin;
 #endif
 
   if (filename[0] == 0) { return VIDEO_NUM_404; }

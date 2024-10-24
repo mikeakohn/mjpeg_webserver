@@ -35,12 +35,15 @@
 #endif
 #endif
 
+#include "alias.h"
 #include "avi.h"
+#include "cgi_handler.h"
 #include "config.h"
 #include "general.h"
 #include "globals.h"
 #include "functions.h"
 #include "network_io.h"
+#include "plugin.h"
 #include "user.h"
 
 #ifdef WINDOWS
@@ -77,12 +80,12 @@ int socketdie(int socketid)
 void destroy()
 {
 #ifdef ENABLE_CGI
-  struct cgi_handler_t *next_handler;
+  CgiHandler *next_handler;
 #endif
 #ifdef ENABLE_PLUGIN
-  struct plugin_t *next_plugin;
+  Plugin *next_plugin;
 #endif
-  struct alias_t *next_alias;
+  Alias *next_alias;
   int r;
 
   //if (htdocs_dir != 0) { free(htdocs_dir); }

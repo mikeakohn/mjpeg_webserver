@@ -33,12 +33,15 @@
 #endif
 #endif
 
+#include "alias.h"
 #include "avi.h"
 #include "avi_play.h"
+#include "cgi_handler.h"
 #include "config.h"
 #include "general.h"
 #include "globals.h"
 #include "functions.h"
+#include "plugin.h"
 
 void config_init(Config *config, int argc, char *argv[])
 {
@@ -55,12 +58,12 @@ void config_init(Config *config, int argc, char *argv[])
   config->frame_rate = 30;
 
   debug = 0;
-  alias = 0;
+  alias = NULL;
 #ifdef ENABLE_CGI
-  cgi_handler = 0;
+  cgi_handler = NULL;
 #endif
 #ifdef ENABLE_PLUGIN
-  plugin = 0;
+  plugin = NULL;
 #endif
 
   int config_was_read = 0;
@@ -200,10 +203,10 @@ static int gettoken(FILE *in, char *token, int token_len)
 #ifdef ENABLE_CGI
 static int parse_handler(FILE *in)
 {
-  struct cgi_handler_t *curr_handler, *temp_handler;
+  CgiHandler *curr_handler, *temp_handler;
   char token[2048];
 
-  curr_handler = (struct cgi_handler_t *)malloc(sizeof(struct cgi_handler_t));
+  curr_handler = (CgiHandler *)malloc(sizeof(CgiHandler));
 
   if (cgi_handler == NULL)
   {
@@ -221,7 +224,7 @@ static int parse_handler(FILE *in)
     temp_handler->next_handler = curr_handler;
   }
 
-  memset(curr_handler, 0, sizeof(struct cgi_handler_t));
+  memset(curr_handler, 0, sizeof(CgiHandler));
 
   gettoken(in, token, sizeof(token));
   const int length = strlen(token) + 1;
@@ -258,11 +261,11 @@ static int parse_handler(FILE *in)
 
 static int parse_plugin(FILE *in)
 {
-  struct plugin_t *curr_plugin, *temp_plugin;
+  Plugin *curr_plugin, *temp_plugin;
   mjpeg_webserver_plugin_init_t mjpeg_webserver_plugin_init = NULL;
   char token[2048];
 
-  curr_plugin = (struct plugin_t *)malloc(sizeof(struct plugin_t));
+  curr_plugin = (Plugin *)malloc(sizeof(Plugin));
 
   if (plugin == 0)
   {
@@ -280,7 +283,7 @@ static int parse_plugin(FILE *in)
     temp_plugin->next_plugin = curr_plugin;
   }
 
-  memset(curr_plugin, 0, sizeof(struct plugin_t));
+  memset(curr_plugin, 0, sizeof(Plugin));
 
   gettoken(in, token, sizeof(token));
   curr_plugin->alias = (char *)malloc(strlen(token) + 1);
@@ -339,11 +342,11 @@ static int parse_plugin(FILE *in)
 
 static int parse_alias(FILE *in)
 {
-  struct alias_t *curr_alias, *temp_alias;
+  Alias *curr_alias, *temp_alias;
   char token[2048];
   int r;
 
-  curr_alias = (struct alias_t *)malloc(sizeof(struct alias_t));
+  curr_alias = (Alias *)malloc(sizeof(Alias));
 
   if (alias == NULL)
   {
@@ -360,7 +363,7 @@ static int parse_alias(FILE *in)
     temp_alias->next_alias = curr_alias;
   }
 
-  memset(curr_alias, 0, sizeof(struct alias_t));
+  memset(curr_alias, 0, sizeof(Alias));
 
   gettoken(in, token, sizeof(token));
   curr_alias->url_len = strlen(token);

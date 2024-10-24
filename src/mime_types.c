@@ -14,8 +14,9 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "mime_types.h"
+#include "cgi_handler.h"
 #include "globals.h"
+#include "mime_types.h"
 
 const char *mime_types[] =
 {
@@ -63,7 +64,7 @@ static const int mime_type_code[] =
 int get_mime_type_code(const char *s)
 {
 #ifdef ENABLE_CGI
-  struct cgi_handler_t *curr_handler;
+  CgiHandler *curr_handler;
 #endif
   int l, t;
 

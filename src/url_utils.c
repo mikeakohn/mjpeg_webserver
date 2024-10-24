@@ -14,6 +14,7 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "alias.h"
 #include "globals.h"
 #include "functions.h"
 #include "user.h"
@@ -84,7 +85,7 @@ char *get_querystring(char *filename)
   return filename + ptr + 1;
 }
 
-int parse_querystring(User *user, char *filename, struct alias_t *curr_alias)
+int parse_querystring(User *user, char *filename, Alias *curr_alias)
 {
   int ptr, r;
   char name[256];

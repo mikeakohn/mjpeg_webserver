@@ -55,64 +55,6 @@ int gettimeofday(struct timeval *tv, int tz);
 #define FOUR_OH_OH "<html><body><br><br><h1>400 - mjpeg_webserver Bad Request</h1></body></html>\r\n"
 #endif
 
-struct alias_t
-{
-  struct alias_t *next_alias;
-  int port;
-  int port_start;
-  int type;
-  int url_len;
-  char *url;
-  char *port_param;
-  char *size_param;
-  char *comp_param;
-  char *fps_param;
-};
-
-#ifdef ENABLE_CGI
-struct cgi_handler_t
-{
-  struct cgi_handler_t *next_handler;
-  char *extension;
-  char *application;
-};
-#endif
-
-
-#ifdef ENABLE_PLUGINS
-typedef int (*mjpeg_webserver_plugin_init_t)();
-typedef int (*mjpeg_webserver_plugin_get_t)(int,char*);
-typedef int (*mjpeg_webserver_plugin_post_t)(int,char*,int);
-#ifdef WINDOWS
-#define dlsym GetProcAddress
-#define dlopen(libname,x) LoadLibrary(libname)
-#define dlclose(libhandle) FreeLibrary(libhandle)
-#define socklen_t int
-#endif
-
-struct plugin_t
-{
-  struct plugin_t *next_plugin;
-  char *alias;
-  int alias_len;
-#ifndef WINDOWS
-  void *dlhandle;
-  mjpeg_webserver_plugin_get_t  get;
-  mjpeg_webserver_plugin_post_t post;
-/*
-  void mjpeg_webserver_plugin_init();
-  int mjpeg_webserver_plugin_get(int fd_out, char *querystring);
-  int mjpeg_webserver_plugin_post(int fd_out, char *querystring, int fd_in, int content_length);
-*/
-#else
-  HMODULE dlhandle;
-  mjpeg_webserver_plugin_init_t init;
-  mjpeg_webserver_plugin_get_t  get;
-  mjpeg_webserver_plugin_post_t post;
-#endif
-};
-#endif
-
 /* TODO -- Kill these global variables */
 extern int sockfd;
 //extern int port;
@@ -124,13 +66,6 @@ extern Video video[100];
 extern int debug;
 extern uint32_t uptime;
 extern uint32_t server_flags;
-extern struct alias_t *alias;
-#ifdef ENABLE_CGI
-extern struct cgi_handler_t *cgi_handler;
-#endif
-#ifdef ENABLE_PLUGINS
-extern struct plugin_t *plugin;
-#endif
 
 #endif
 

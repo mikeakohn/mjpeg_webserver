@@ -16,6 +16,7 @@
 #include <netdb.h>
 
 #include "config.h"
+#include "plugin.h"
 
 #define BUFFER_SIZE 514
 
@@ -62,7 +63,7 @@ typedef struct User
   int method;
 #ifdef ENABLE_PLUGINS
   char querystring[QUERY_STRING_SIZE];
-  struct plugin_t *plugin;
+  Plugin *plugin;
 #endif
 #ifdef ENABLE_CAPTURE
   uint8_t *jpeg;
