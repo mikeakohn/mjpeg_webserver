@@ -32,7 +32,7 @@ int file_open(User *user, Config *config, char *filename)
 {
   Alias *curr_alias;
   struct stat file_stat;
-  char *querystring = NULL;
+  //char *querystring = NULL;
 #ifdef ENABLE_CGI
   char handler_file[2048];
   CgiHandler *curr_handler;
@@ -82,8 +82,8 @@ if (debug == 1)
       // send_header_plugin(id);
 
       // Here I am, and you're a querystring.
-      querystring = filename + curr_plugin->alias_len;
-      if (querystring[0]=='?') { querystring=querystring + 1; }
+      const char *querystring = filename + curr_plugin->alias_len;
+      if (querystring[0] == '?') { querystring=querystring + 1; }
 
       user->plugin = curr_plugin;
       snprintf(user->querystring, QUERY_STRING_SIZE, querystring);
@@ -101,8 +101,6 @@ if (debug == 1)
     curr_plugin = curr_plugin->next_plugin;
   }
 #endif
-
-  querystring = get_querystring(filename);
 
   if (check_valid_file(filename) == -1)
   {
@@ -145,6 +143,7 @@ if (debug == 1)
     if (user->in != -1) { file_close(user); }
 
 #ifdef ENABLE_CGI
+    const char *querystring = get_querystring(filename);
     setenv("QUERY_STRING", querystring, 1);
 
     if ((user->mime_type & MIME_IS_CGI) != 0)
@@ -152,7 +151,7 @@ if (debug == 1)
       t = MIME_IS_CGI;
       curr_handler = cgi_handler;
 
-      while(t != user->mime_type)
+      while (t != user->mime_type)
       {
         curr_handler = curr_handler->next_handler;
         t++;
