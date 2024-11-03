@@ -159,37 +159,6 @@ void destroy()
   exit(0);
 }
 
-#ifndef WINDOWS
-void broken_pipe()
-{
-#ifdef DEBUG
-  if (debug == 1) { printf("mjpeg_webserver: Pipe Broken\n"); }
-#endif
-
-  set_signals();
-}
-
-void other_signal()
-{
-#ifdef DEBUG
-  if (debug == 1) { printf("Signal thrown\n"); }
-#endif
-
-  set_signals();
-}
-
-void set_signals()
-{
-  signal(SIGPIPE, broken_pipe);
-  signal(SIGURG,  other_signal);
-  signal(SIGIO,   other_signal);
-  signal(SIGHUP,  other_signal);
-
-  signal(SIGINT,  destroy);
-  signal(SIGTERM, destroy);
-}
-#endif
-
 void message(int id, char *message_string)
 {
   if (users[id]->inuse == 1)

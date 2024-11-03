@@ -30,6 +30,7 @@
 #include "config.h"
 #include "globals.h"
 #include "server.h"
+#include "set_signals.h"
 
 #if 0
 #include "avi_play.h"
@@ -87,6 +88,10 @@ int main(int argc, char *argv[])
       return 0;
     }
   }
+#endif
+
+#ifndef WINDOWS
+  set_signals();
 #endif
 
   server_run(&config);

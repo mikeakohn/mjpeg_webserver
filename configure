@@ -9,7 +9,7 @@ LDFLAGS=""
 CONFIG_EXT=""
 WITH_MMAP="no"
 
-OBJS="avi_parse.o avi_play.o config.o file_io.o general.o mime_types.o network_io.o http_headers.o server.o url_utils.o user.o"
+OBJS="avi_parse.o avi_play.o config.o file_io.o general.o mime_types.o network_io.o http_headers.o server.o set_signals.o url_utils.o user.o"
 
 targetos=`uname -s`
 case $targetos in
