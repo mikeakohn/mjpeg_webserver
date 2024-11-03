@@ -628,7 +628,6 @@ static void skip_block(FILE *in)
 
 void config_read(Config *config, const char *config_dir)
 {
-  FILE *in;
   char token[1024];
   char username[512];
   char password[256];
@@ -639,11 +638,11 @@ void config_read(Config *config, const char *config_dir)
   username[0] = 0;
   password[0] = 0;
 
-  in = fopen(config_dir, "rb");
+  FILE *in = fopen(config_dir, "rb");
 
-  if (in == 0)
+  if (in == NULL)
   {
-    printf("No config file found (%s). Going with defaults.\n", config_dir);
+    printf("No config file found \"%s\". Going with defaults.\n", config_dir);
     return;
   }
 
