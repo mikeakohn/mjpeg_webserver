@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef WINDOWS
+#include <unistd.h>
+#endif
 #ifdef WINDOWS
 #include <windows.h>
 #endif
@@ -25,6 +28,7 @@
 #endif
 
 #include "config.h"
+#include "globals.h"
 #include "server.h"
 
 #if 0
@@ -61,8 +65,31 @@ int main(int argc, char *argv[])
   config_init(&config, argc, argv);
   config_dump(&config);
 
-  server_run(&config);
+#ifndef WINDOWS
+  if (debug == 0)
+  {
+    int r = fork();
 
+    if (r == -1)
+    {
+      perror("Error: Could not fork\n"); exit(3);
+    }
+      else
+    if (r == 0)
+    {
+      close(STDIN_FILENO);
+      close(STDERR_FILENO);
+
+      if (setsid() == -1) { exit(4); }
+    }
+      else
+    {
+      return 0;
+    }
+  }
+#endif
+
+  server_run(&config);
   config_destroy(&config);
 
   return 0;

@@ -485,30 +485,6 @@ int server_run(Config *config)
 
   uptime = time(NULL);
 
-#ifndef WINDOWS
-  if (debug == 0)
-  {
-    r = fork();
-
-    if (r == -1)
-    {
-      perror("Error: Could not fork\n"); exit(3);
-    }
-      else
-    if (r == 0)
-    {
-      close(STDIN_FILENO);
-      close(STDERR_FILENO);
-
-      if (setsid() == -1) { exit(4); }
-    }
-      else
-    {
-      return 0;
-    }
-  }
-#endif
-
   if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
   {
     printf("Can't open socket.\n");
