@@ -19,7 +19,9 @@
 #include <sys/time.h>
 #include <pwd.h>
 #include <grp.h>
+#ifdef ENABLE_PLUGIN
 #include <dlfcn.h>
+#endif
 #endif
 #include <errno.h>
 #include <time.h>
