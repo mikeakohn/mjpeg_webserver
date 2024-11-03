@@ -17,6 +17,7 @@
 #endif
 
 #include "general.h"
+#include "globals.h"
 #include "set_signals.h"
 
 #ifndef WINDOWS

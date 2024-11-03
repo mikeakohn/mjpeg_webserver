@@ -513,6 +513,7 @@ int server_run(Config *config)
 
   if (debug == 0) { close(STDOUT_FILENO); }
 
+  memset(&nulluser, 0, sizeof(nulluser));
   nulluser.inuse = 0;
   nulluser.idletime = -1;
   users = malloc(sizeof(User *) * config->maxconn);
