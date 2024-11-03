@@ -506,10 +506,6 @@ int server_run(Config *config)
 
   listen(sockfd, 5);
 
-#ifndef WINDOWS
-  config_set_runas(config);
-#endif
-
   printf("\n" VERSION "\n" COPYRIGHT "\n\n");
 
   printf("Started on port: %d\n", config->port);

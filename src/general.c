@@ -88,8 +88,6 @@ void destroy()
   Alias *next_alias;
   int r;
 
-  //if (htdocs_dir != 0) { free(htdocs_dir); }
-
   for (r = 0; r < video_count; r++)
   {
 #ifdef ENABLE_CAPTURE
@@ -247,7 +245,7 @@ void setup(int argc, char *argv[])
 }
 #endif
 
-int base64_encode(char *user_pass_64, const char *text_in)
+int base64_encode_(char *user_pass_64, const char *text_in)
 {
   int t,l,ptr;
   int holding,bitptr;

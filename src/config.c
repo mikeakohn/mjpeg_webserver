@@ -104,10 +104,16 @@ void config_destroy(Config *config)
 
 void config_dump(Config *config)
 {
+  const char *htdocs_dir = config->htdocs_dir;
+  const char *index_file = config->index_file;
+
+  if (htdocs_dir == NULL) { htdocs_dir = "<not set>"; }
+  if (index_file == NULL) { index_file = "<not set>"; }
+
   printf(" -- config_dump() --\n");
   printf("         port: %d\n", config->port);
-  printf("   htdocs_dir: %s\n", config->htdocs_dir);
-  printf("   index_file: %s\n", config->index_file);
+  printf("   htdocs_dir: %s\n", htdocs_dir);
+  printf("   index_file: %s\n", index_file);
   printf(" jpeg_quality: %d\n", config->jpeg_quality);
   printf("      minconn: %d\n", config->minconn);
   printf("      maxconn: %d\n", config->maxconn);
@@ -547,7 +553,7 @@ static int parse_capture(FILE *in)
 }
 #endif
 
-#ifndef WINDOWS
+#if !defined(WINDOWS) && !defined(ENABLE_ESP32)
 void config_set_runas(Config *config)
 {
   struct passwd *pw;
@@ -591,7 +597,6 @@ void config_set_runas(Config *config)
     runas_user = NULL;
   }
 }
-
 #endif
 
 #if !defined(ENABLE_CGI) || !defined(ENABLE_PLUGINS) || !defined(ENABLE_CAPTURE)
@@ -638,7 +643,7 @@ void config_read(Config *config, const char *config_dir)
 
   if (in == 0)
   {
-    printf("No config file found.  Going with defaults.\n");
+    printf("No config file found (%s). Going with defaults.\n", config_dir);
     return;
   }
 
@@ -798,7 +803,7 @@ void config_read(Config *config, const char *config_dir)
     strcat(username, ":");
     strcat(username, password);
 
-    base64_encode(config->user_pass_64, username);
+    base64_encode_(config->user_pass_64, username);
   }
 }
 

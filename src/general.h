@@ -18,8 +18,7 @@ void broken_pipe();
 void set_signals();
 void message(int id, char *daMessage);
 int conv_num(const char *s);
-//void setup(int argc, char *argv[]);
-int base64_encode(char *user_pass_64, const char *text_in);
+int base64_encode_(char *user_pass_64, const char *text_in);
 //int base64_compare(char *text_in);
 
 #endif

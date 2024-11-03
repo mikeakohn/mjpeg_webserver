@@ -42,6 +42,7 @@ int file_open(User *user, Config *config, char *filename)
   Plugin *curr_plugin;
 #endif
 
+  if (config->htdocs_dir == NULL) { return VIDEO_NUM_404; }
   if (filename[0] == 0) { return VIDEO_NUM_404; }
 
 #ifdef DEBUG

@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
 
 #ifndef WINDOWS
   set_signals();
+  config_set_runas(&config);
 #endif
 
   server_run(&config);
