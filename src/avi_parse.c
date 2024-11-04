@@ -88,7 +88,7 @@ int parse_idx1(FILE *in, int chunk_len, Video *video, int movi_ptr)
 
 #if 0
 #ifdef DEBUG
-    printf("%s   0x%08x      0x%08x           0x%08x  0x%08x\n",
+    printf("%.4s   0x%08x      0x%08x           0x%08x  0x%08x\n",
              index_entry.ckid,
              index_entry.flags,
              index_entry.offset,
@@ -163,8 +163,8 @@ int read_stream_header(FILE *in, struct stream_header_t *stream_header)
 #ifdef DEBUG
   printf("STREAM HEADER\n");
   printf("-------------------------------\n");
-  printf("             DataType: %s\n", stream_header->data_type);
-  printf("                Codec: %s\n", stream_header->codec);
+  printf("             DataType: %.4s\n", stream_header->data_type);
+  printf("                Codec: %.4s\n", stream_header->codec);
   printf("                Flags: %d\n", stream_header->flags);
   printf("             Priority: %d\n", stream_header->priority);
   printf("        InitialFrames: %d\n", stream_header->initial_frames);

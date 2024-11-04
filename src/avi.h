@@ -32,8 +32,8 @@ struct avi_header_t
 
 struct stream_header_t
 {
-  char data_type[5];
-  char codec[5];
+  char data_type[4];
+  char codec[4];
   int flags;
   int priority;
   int initial_frames;
@@ -64,7 +64,7 @@ struct stream_format_t
 
 struct index_entry_t
 {
-  char ckid[5];
+  char ckid[4];
   int flags;
   int offset;
   int length;
