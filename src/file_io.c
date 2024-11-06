@@ -289,15 +289,3 @@ int read_chars(FILE *in, char *s, int count)
   return 0;
 }
 
-int read_bytes(FILE *in, char *s, int count)
-{
-  int t;
-
-  for (t = 0; t < count; t++)
-  {
-    s[t] = getc(in);
-  }
-
-  return 0;
-}
-

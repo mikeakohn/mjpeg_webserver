@@ -22,7 +22,6 @@ int read_int32(FILE *in);
 int read_int16(FILE *in);
 
 int read_chars(FILE *in, char *s, int count);
-int read_bytes(FILE *in, char *s, int count);
 
 #endif
 

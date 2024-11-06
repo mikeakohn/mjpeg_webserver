@@ -25,7 +25,12 @@ int skip_chunk(FILE *in)
   int chunk_size;
   int end_of_chunk;
 
-  read_bytes(in, chunk_id, 4);
+  if (fread(chunk_id, 1, 4, in) != 4)
+  {
+    printf("Error: fread() failed %s:%d\n", __FILE__, __LINE__);
+    return -1;
+  }
+
   chunk_size = read_int32(in);
 
 #ifdef DEBUG
@@ -67,7 +72,12 @@ int parse_idx1(FILE *in, int chunk_len, Video *video, int movi_ptr)
 
   for (t = 0; t < chunk_len / 16; t++)
   {
-    read_bytes(in, index_entry.ckid, 4);
+    if (fread(index_entry.ckid, 1, 4, in) != 4)
+    {
+      printf("Error: fread() failed %s:%d\n", __FILE__, __LINE__);
+      return -1;
+    }
+
     index_entry.flags  = read_int32(in);
     index_entry.offset = read_int32(in);
     index_entry.length = read_int32(in);
@@ -147,8 +157,18 @@ int read_avi_header(FILE *in, struct avi_header_t *avi_header)
 
 int read_stream_header(FILE *in, struct stream_header_t *stream_header)
 {
-  read_bytes(in,stream_header->data_type, 4);
-  read_bytes(in,stream_header->codec, 4);
+  if (fread(stream_header->data_type, 1, 4, in) != 4)
+  {
+    printf("Error: fread() failed %s:%d\n", __FILE__, __LINE__);
+    return -1;
+  }
+
+  if (fread(stream_header->codec, 1, 4, in) != 4)
+  {
+    printf("Error: fread() failed %s:%d\n", __FILE__, __LINE__);
+    return -1;
+  }
+
   stream_header->flags          = read_int32(in);
   stream_header->priority       = read_int32(in);
   stream_header->initial_frames = read_int32(in);
@@ -248,9 +268,19 @@ int parse_hdrl_list(
   int end_of_chunk;
   int next_chunk;
 
-  read_bytes(in, chunk_id, 4);
+  if (fread(chunk_id, 1, 4, in) != 4)
+  {
+    printf("Error: fread() failed %s:%d\n", __FILE__, __LINE__);
+    return -1;
+  }
+
   chunk_size = read_int32(in);
-  read_bytes(in, chunk_type, 4);
+
+  if (fread(chunk_type, 1, 4, in) != 4)
+  {
+    printf("Error: fread() failed %s:%d\n", __FILE__, __LINE__);
+    return -1;
+  }
 
 #ifdef DEBUG
   printf("AVI Header Chunk LIST\n");
@@ -270,7 +300,12 @@ int parse_hdrl_list(
 
   while (ftell(in) < end_of_chunk)
   {
-    read_bytes(in, chunk_type, 4);
+    if (fread(chunk_type, 1, 4, in) != 4)
+    {
+      printf("Error: fread() failed %s:%d\n", __FILE__, __LINE__);
+      return -1;
+    }
+
     chunk_size = read_int32(in);
     next_chunk = ftell(in) + chunk_size;
 
@@ -319,7 +354,12 @@ int parse_hdrl(
   int chunk_size;
   int end_of_chunk;
 
-  read_bytes(in, chunk_id, 4);
+  if (fread(chunk_id, 1, 4, in) != 4)
+  {
+    printf("Error: fread() failed %s:%d\n", __FILE__, __LINE__);
+    return -1;
+  }
+
   chunk_size = read_int32(in);
 
 #ifdef DEBUG
@@ -355,9 +395,19 @@ int parse_riff(FILE *in, Video *video)
   long movi_ptr = 0;
   float float_fps;
 
-  read_bytes(in, chunk_id, 4);
+  if (fread(chunk_id, 1, 4, in) != 4)
+  {
+    printf("Error: fread() failed %s:%d\n", __FILE__, __LINE__);
+    return -1;
+  }
+
   chunk_size = read_int32(in);
-  read_bytes(in, chunk_type, 4);
+
+  if (fread(chunk_type, 1, 4, in) != 4)
+  {
+    printf("Error: fread() failed %s:%d\n", __FILE__, __LINE__);
+    return -1;
+  }
 
 #ifdef DEBUG
   printf("RIFF Chunk\n");
@@ -395,7 +445,12 @@ int parse_riff(FILE *in, Video *video)
 
   while (ftell(in) < end_of_chunk)
   {
-    read_bytes(in, chunk_id, 4);
+    if (fread(chunk_id, 1, 4, in) != 4)
+    {
+      printf("Error: fread() failed %s:%d\n", __FILE__, __LINE__);
+      return -1;
+    }
+
     chunk_size = read_int32(in);
     end_of_subchunk = ftell(in) + chunk_size;
 
@@ -412,7 +467,11 @@ int parse_riff(FILE *in, Video *video)
     }
       else
     {
-      read_bytes(in, chunk_type, 4);
+      if (fread(chunk_type, 1, 4, in) != 4)
+      {
+        printf("Error: fread() failed %s:%d\n", __FILE__, __LINE__);
+        return -1;
+      }
     }
 
 #ifdef DEBUG

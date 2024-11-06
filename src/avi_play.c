@@ -29,7 +29,7 @@ int avi_init(const char *filename)
 {
   FILE *in = fopen(filename, "rb");
 
-  if (in == 0)
+  if (in == NULL)
   {
     printf("Cannot open AVI file: %s\n", filename);
     return -1;
