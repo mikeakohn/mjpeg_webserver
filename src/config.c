@@ -45,18 +45,23 @@
 #include "functions.h"
 #include "plugin.h"
 
+#ifndef ENABLE_ESP32
+#define TOKEN_LENGTH 1024
+#else
+#define TOKEN_LENGTH 256
+#endif
+
 void config_init(Config *config, int argc, char *argv[])
 {
   int r;
 
+  memset(config, 0, sizeof(Config));
+
   config->port = DEFAULT_PORT;
   config->jpeg_quality = DEFAULT_JPEG_QUALITY;
-  config->htdocs_dir = NULL;
-  config->index_file = NULL;
   config->minconn = 10;
   config->maxconn = 50;
   config->max_idle_time = 60;
-  memset(config->user_pass_64, 0, sizeof(config->user_pass_64));
   config->frame_rate = 30;
 
   debug = 0;
@@ -119,6 +124,9 @@ void config_dump(Config *config)
   printf("      maxconn: %d\n", config->maxconn);
   printf("max_idle_time: %d\n", config->max_idle_time);
   printf("   frame_rate: %d\n", config->frame_rate);
+  printf("    wifi_ssid: %s\n", config->wifi_ssid);
+  printf("wifi_password: %s\n", config->wifi_password);
+  printf("   wifi_is_ap: %d\n", config->wifi_is_ap);
 }
 
 #ifdef ENABLE_CAPTURE
@@ -212,7 +220,7 @@ static int gettoken(FILE *in, char *token, int token_len)
 static int parse_handler(FILE *in)
 {
   CgiHandler *curr_handler, *temp_handler;
-  char token[2048];
+  char token[TOKEN_LENGTH];
 
   curr_handler = (CgiHandler *)malloc(sizeof(CgiHandler));
 
@@ -271,7 +279,7 @@ static int parse_plugin(FILE *in)
 {
   Plugin *curr_plugin, *temp_plugin;
   mjpeg_webserver_plugin_init_t mjpeg_webserver_plugin_init = NULL;
-  char token[2048];
+  char token[TOKEN_LENGTH];
 
   curr_plugin = (Plugin *)malloc(sizeof(Plugin));
 
@@ -351,7 +359,7 @@ static int parse_plugin(FILE *in)
 static int parse_alias(FILE *in)
 {
   Alias *curr_alias, *temp_alias;
-  char token[2048];
+  char token[TOKEN_LENGTH];
   int r;
 
   curr_alias = (Alias *)malloc(sizeof(Alias));
@@ -460,9 +468,9 @@ static int parse_alias(FILE *in)
 #ifdef ENABLE_CAPTURE
 static int parse_capture(FILE *in)
 {
-  char token[1024];
-  char value[1024];
-  char video_dev[1024];
+  char token[TOKEN_LENGTH];
+  char value[TOKEN_LENGTH];
+  char video_dev[TOKEN_LENGTH];
   int i;
 
   gettoken(in, video_dev, sizeof(video_dev));
@@ -602,7 +610,7 @@ void config_set_runas(Config *config)
 #if !defined(ENABLE_CGI) || !defined(ENABLE_PLUGINS) || !defined(ENABLE_CAPTURE)
 static void skip_block(FILE *in)
 {
-  char token[1024];
+  char token[TOKEN_LENGTH];
   int brace_count = 0;
 
   while (gettoken(in, token, sizeof(token)) == 0)
@@ -628,9 +636,9 @@ static void skip_block(FILE *in)
 
 void config_read(Config *config, const char *config_dir)
 {
-  char token[1024];
-  char username[512];
-  char password[256];
+  char token[TOKEN_LENGTH];
+  char username[128];
+  char password[128];
 #ifndef WINDOWS
   int ch;
 #endif
@@ -787,6 +795,24 @@ void config_read(Config *config, const char *config_dir)
       printf("Capture support was not compiled in.\n");
       skip_block(in);
 #endif
+    }
+      else
+    if (strcasecmp(token, "wifi_is_ap") == 0)
+    {
+      gettoken(in, token, sizeof(token));
+      config->wifi_is_ap = atoi(token);
+    }
+      else
+    if (strcasecmp(token, "wifi_ssid") == 0)
+    {
+      gettoken(in, token, sizeof(token));
+      snprintf(config->wifi_ssid, sizeof(config->wifi_ssid), "%.63s", token);
+    }
+      else
+    if (strcasecmp(token, "wifi_password") == 0)
+    {
+      gettoken(in, token, sizeof(token));
+      snprintf(config->wifi_password, sizeof(config->wifi_password), "%.63s", token);
     }
       else
     {

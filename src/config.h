@@ -25,6 +25,9 @@ typedef struct Config
   int minconn;
   int max_idle_time;
   char user_pass_64[PASS64_LEN];
+  char wifi_ssid[64];
+  char wifi_password[64];
+  int wifi_is_ap;
   int jpeg_quality;
   int frame_rate;
 } Config;
