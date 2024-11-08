@@ -11,12 +11,14 @@ filename /sdcard/videos/video_2.avi
 
 # WiFi stuff specific to ESP32.
 
+# Setup WiFi to be the access point of the network.
 #wifi_is_ap 1
-#wifi_ap camera
+#wifi_ssid camera
 #wifi_password camera
 
+# Setup WiFi to connect to an established access point.
 wifi_is_ap 0
-wifi_ap someap
+wifi_ssid someap
 wifi_password password
 
 # Video4Linux capture devices (does not compile in by default)
