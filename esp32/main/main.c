@@ -42,7 +42,7 @@ void app_main(void)
   }
 #endif
 
-  char *args[] = { "", "-d", "-f", "/sdcard/httpd_cl.cnf" };
+  char *args[] = { "", "-d", "-f", "/sdcard/httpd.cnf" };
   const int count = sizeof(args) / sizeof(char *);
 
   Config config;
