@@ -126,30 +126,12 @@ static size_t jpg_encode_stream(
   memcpy(user->jpeg, data, len);
   user->content_length = len;
 
-#if 0
-  if (index != 0)
-  {
-    j->len = 0;
-  }
-#endif
-
-#if 0
-  if (httpd_resp_send_chunk(j->req, (const char *)data, len) != ESP_OK)
-  {
-    return 0;
-  }
-
-  j->len += len;
-#endif
-
-
   return len;
 }
 
 int capture_image(CaptureInfo *capture_info, int id)
 {
   uint32_t fb_len = 0;
-  //int64_t fr_start = esp_timer_get_time();
 
   User *user = users[id];
 
@@ -168,38 +150,26 @@ int capture_image(CaptureInfo *capture_info, int id)
     return -2;
   }
 
-#if 0
-  res = httpd_resp_set_type(req, "image/jpeg");
-
-  if (res == ESP_OK)
-  {
-    res = httpd_resp_set_hdr(req, "Content-Disposition", "inline; filename=capture.jpg");
-  }
-
-  if (res != ESP_OK) { return -3; }
-#endif
-
   esp_err_t res = ESP_OK;
 
   if (fb->format == PIXFORMAT_JPEG)
   {
-ESP_LOGI(TAG, "PIXFORMAT_JPEG");
+    //ESP_LOGI(TAG, "PIXFORMAT_JPEG");
+
     fb_len = fb->len;
-    //res = httpd_resp_send(req, (const char *)fb->buf, fb->len);
     user->jpeg = fb->buf;
     user->content_length = fb->len;
   }
     else
   {
-ESP_LOGI(TAG, "compress JPEG");
+    //ESP_LOGI(TAG, "compress JPEG");
+
     res = frame2jpg_cb(fb, 80, jpg_encode_stream, user) ? ESP_OK : ESP_FAIL;
 
     fb_len = user->content_length;
   }
 
   //esp_camera_fb_return(fb);
-
-  //int64_t fr_end = esp_timer_get_time();
 
   ESP_LOGI(TAG, "JPG: %luKB  content_length: %d", (uint32_t)(fb_len / 1024), user->content_length);
 
