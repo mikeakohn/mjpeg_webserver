@@ -35,8 +35,11 @@ static camera_config_t camera_config =
   .pin_href = CAM_PIN_HREF,
   .pin_pclk = CAM_PIN_PCLK,
 
+  // These options create images around 228k (UXGA with quality of 12).
+
   // EXPERIMENTAL: Set to 16MHz on ESP32-S2 or ESP32-S3 to enable EDMA mode.
-  .xclk_freq_hz = 20000000,
+  .xclk_freq_hz = 8000000,
+  //.xclk_freq_hz = 20000000,
   .ledc_timer = LEDC_TIMER_0,
   .ledc_channel = LEDC_CHANNEL_0,
 
@@ -47,14 +50,17 @@ static camera_config_t camera_config =
   // The performance of the ESP32-S series has improved a lot, but JPEG
   // mode always gives better frame rates.
   .frame_size = FRAMESIZE_UXGA,
+  //.frame_size = FRAMESIZE_QVGA,
 
    // 0-63, for OV series camera sensors, lower number means higher quality.
   .jpeg_quality = 12,
   // When jpeg mode is used, if fb_count more than one, the driver will
   // work in continuous mode.
   .fb_count = 1,
+  //.fb_location = CAMERA_FB_IN_PSRAM,
   // CAMERA_GRAB_LATEST. Sets when buffers should be filled.
   .grab_mode = CAMERA_GRAB_WHEN_EMPTY
+  //.grab_mode = CAMERA_GRAB_LATEST
 };
 
 int open_capture(CaptureInfo *capture_info, char *dev_name)
@@ -142,13 +148,19 @@ static size_t jpg_encode_stream(
 
 int capture_image(CaptureInfo *capture_info, int id)
 {
-  camera_fb_t *fb = NULL;
   uint32_t fb_len = 0;
   //int64_t fr_start = esp_timer_get_time();
 
   User *user = users[id];
 
-  fb = esp_camera_fb_get();
+  if (capture_info->fb != NULL)
+  {
+    esp_camera_fb_return(capture_info->fb);
+  }
+
+  camera_fb_t *fb = esp_camera_fb_get();
+
+  capture_info->fb = fb;
 
   if (fb == NULL)
   {
@@ -185,7 +197,7 @@ ESP_LOGI(TAG, "compress JPEG");
     fb_len = user->content_length;
   }
 
-  esp_camera_fb_return(fb);
+  //esp_camera_fb_return(fb);
 
   //int64_t fr_end = esp_timer_get_time();
 
