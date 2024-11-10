@@ -78,5 +78,7 @@ void user_destroy(User *user);
 int user_connect(Config *config, int socketid, struct sockaddr_in *cli_addr);
 void user_disconnect(User *user);
 
+extern User **users;
+
 #endif
 

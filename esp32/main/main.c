@@ -42,14 +42,15 @@ void app_main(void)
   }
 #endif
 
-  char *args[] = { "", "-d", "-f", "/sdcard/httpd_ap.cnf" };
-  //char *args[] = { "", "-d", "-f", "/sdcard/httpd_cl.cnf" };
+  char *args[] = { "", "-d", "-f", "/sdcard/httpd_cl.cnf" };
   const int count = sizeof(args) / sizeof(char *);
 
   Config config;
-  config_init(&config, count, args);
 
   ESP_LOGI(TAG, "Config init.");
+  config_init(&config, count, args);
+
+  ESP_LOGI(TAG, "Config read in.");
 
   config_dump(&config);
   ESP_LOGI(TAG, "Config dump.");

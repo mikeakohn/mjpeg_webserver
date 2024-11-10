@@ -37,5 +37,14 @@ typedef struct Video
 #endif
 } Video;
 
+#ifdef ENABLE_ESP32
+#define MAX_VIDEO_COUNT 8
+#else
+#define MAX_VIDEO_COUNT 100
+#endif
+
+extern int video_count;
+extern Video video[MAX_VIDEO_COUNT];
+
 #endif
 

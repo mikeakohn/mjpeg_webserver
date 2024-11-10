@@ -23,6 +23,8 @@
 #include "network_io.h"
 #include "user.h"
 
+User **users;
+
 void user_init(User *user, int id, int socketid)
 {
   user->inuse = 200;

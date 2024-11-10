@@ -40,7 +40,7 @@ Content-Type: image/jpeg
 
 int send_header(int id)
 {
-  char temp[256];
+  char temp[128];
 
   // struct tm mod_tm;
   // gmtime_r(&users[id]->last_modified,&mod_tm);

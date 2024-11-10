@@ -37,9 +37,6 @@ typedef struct CaptureInfo
   int jpeg_len;
   int callback_wait;
 #endif
-#ifdef ENABLE_ESP32
-  //void *request;
-#endif
   uint8_t *buffer;
   int buffer_len;
   uint8_t *picture;

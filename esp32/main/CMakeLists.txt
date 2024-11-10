@@ -1,5 +1,6 @@
 idf_component_register(
   SRCS
+    esp32_capture.c
     main.c
     sdmmc.c
     wifi.c
@@ -20,6 +21,7 @@ idf_component_register(
 
 add_definitions(
   -DDEBUG
+  -DENABLE_CAPTURE
   -DENABLE_ESP32
 )
 

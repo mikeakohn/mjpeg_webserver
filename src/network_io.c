@@ -43,37 +43,33 @@
 int send_data(int socketid, const char *message, int message_len)
 {
   struct timeval tv;
-  fd_set writeset;
+  fd_set write_set;
   int t;
 
-  FD_ZERO(&writeset);
-  FD_SET(socketid, &writeset);
-
-  // FIXME - Time out of null is bad bad bad
-
-  tv.tv_sec = 2;
-  tv.tv_usec = 0;
-
-  if (((t = select(socketid + 1, NULL, &writeset, NULL, &tv)) == -1) &&
-      errno != EINTR)
+  while (1)
   {
-    printf("Problem with select\n");
-    return -1;
-  }
-    else
-  {
-    if (t == 0) { return -1; }
+    FD_ZERO(&write_set);
+    FD_SET(socketid, &write_set);
 
-    t = send(socketid, message, message_len, 0);
-#ifdef WINDOWS
-    _commit(socketid);
-#else
-    fsync(socketid);
-#endif
-    return t;
-  }
+    tv.tv_sec = 5;
+    tv.tv_usec = 0;
 
-  return 0;
+    if ((t = select(socketid + 1, NULL, &write_set, NULL, &tv)) == -1)
+    {
+      if (errno == EINTR) { continue; }
+
+      printf("Problem with select\n");
+      return -1;
+    }
+      else
+    {
+      if (t == 0) { return -1; }
+
+      t = send(socketid, message, message_len, 0);
+
+      return t;
+    }
+  }
 }
 
 int send_file(int id)
@@ -187,7 +183,7 @@ if (debug==1)
 #endif
 
     t = 0;
-    while(t < r)
+    while (t < r)
     {
 #ifdef WITH_MMAP
       if (users[id]->video_num >= 0)
@@ -243,10 +239,6 @@ if (debug==1)
 #ifdef ENABLE_CAPTURE
 int send_capture_frame(int id)
 {
-  char temp_string[BIGGEST_FILE_CHUNK];
-  // uint8_t *cap_buffer;
-  int t, k, r, c;
-
   if (users[id]->need_header == NEED_HEADER_YES)
   {
     users[id]->jpeg_ptr = 0;
@@ -256,7 +248,7 @@ int send_capture_frame(int id)
       capture_image(video[users[id]->video_num].capture_info, id);
 
 #ifdef DEBUG
-printf("content-length: %d\n", users[id]->content_length);
+if (debug == 1) { printf("content-length: %d\n", users[id]->content_length); }
 #endif
 
     if (users[id]->content_length < 0) { users[id]->content_length = 0; }
@@ -285,63 +277,83 @@ printf("content-length: %d\n", users[id]->content_length);
       users[id]->jpeg_quality);
 #endif
 
-    if (users[id]->request_type == REQUEST_SINGLE)
+    switch (users[id]->request_type)
     {
-      send_header(id);
-    }
-      else
-    if (users[id]->request_type == REQUEST_MULTIPART)
-    {
-      send_header_multipart(id);
-    }
-      else
-    if (users[id]->request_type == REQUEST_MULTIPART2)
-    {
-      sprintf(temp_string,
-        "\r\n--myboundary"
-        "\r\nContent-Type: image/jpeg"
-        "\r\nContent-Length: %d\r\n\r\n",
-        users[id]->content_length);
+      case REQUEST_SINGLE:
+      {
+        send_header(id);
+        break;
+      }
+      case REQUEST_MULTIPART:
+      {
+        send_header_multipart(id);
+        break;
+      }
+      case REQUEST_MULTIPART2:
+      {
+        char temp_string[96];
 
-      message(id, temp_string);
+        sprintf(temp_string,
+          "\r\n--myboundary"
+          "\r\nContent-Type: image/jpeg"
+          "\r\nContent-Length: %d\r\n\r\n",
+          users[id]->content_length);
+
+        message(id, temp_string);
+        break;
+      }
     }
 
     users[id]->need_header = NEED_HEADER_NO;
   }
 
+//FIXME: REMOVE
+//printf("send_capture_frame() %d/%d %d chunks=%d\n",
+//  users[id]->jpeg_ptr,
+//  users[id]->content_length, id,
+//  CHUNKS_PER_SEND);
+
 #ifdef NO_INTERLACED_FILE
-  while(users[id]->jpeg_ptr < users[id]->content_length)
+  while (users[id]->jpeg_ptr < users[id]->content_length)
 #else
+  int c;
+
   for (c = 0; c < CHUNKS_PER_SEND; c++)
 #endif
   {
     // This BIGGEST_FILE_CHUNK thing needs work.
+    int chunk_length = users[id]->content_length - users[id]->jpeg_ptr;
 
-    if (users[id]->content_length - users[id]->jpeg_ptr > BIGGEST_FILE_CHUNK)
+#if 0
+    if (chunk_length > BIGGEST_FILE_CHUNK)
     {
-      r = BIGGEST_FILE_CHUNK;
+      chunk_length = users[id]->jpeg_ptr + BIGGEST_FILE_CHUNK;
     }
-      else
+#endif
+
+    const int socketid = users[id]->socketid;
+
+    while (users[id]->jpeg_ptr < chunk_length)
     {
-      r = users[id]->content_length - users[id]->jpeg_ptr;
-    }
+//printf("Preparing to send %d bytes\n", chunk_length - users[id]->jpeg_ptr);
+      int length = chunk_length - users[id]->jpeg_ptr;
+      if (length > 4096) { length = 4096; }
 
-    t = 0;
+      int last_length = send_data(
+        socketid,
+        (char *)(users[id]->jpeg + users[id]->jpeg_ptr),
+        //chunk_length - users[id]->jpeg_ptr);
+        length);
 
-    while(t < r)
-    {
-      k = send_data(users[id]->socketid, (char *)(users[id]->jpeg + users[id]->jpeg_ptr + t), r - t);
-
-      if (k == -1)
+//printf("%d %d %d\n", users[id]->jpeg_ptr, chunk_length, last_length);
+      if (last_length == -1)
       {
         user_disconnect(users[id]);
         return -1;
       }
 
-      t = t + k;
+      users[id]->jpeg_ptr += last_length;
     }
-
-    users[id]->jpeg_ptr += t;
 
     if (users[id]->jpeg_ptr == users[id]->content_length) { break; }
   }

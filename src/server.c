@@ -57,12 +57,11 @@
 #include "video.h"
 
 int sockfd;
-int video_count = 0;
 char *runas_user = NULL;
 char *runas_group = NULL;
-User **users;
 User nulluser;
-Video video[100];
+int video_count = 0;
+Video video[MAX_VIDEO_COUNT];
 int debug;
 uint32_t uptime;
 uint32_t server_flags;

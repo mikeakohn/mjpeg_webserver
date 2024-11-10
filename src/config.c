@@ -48,7 +48,7 @@
 #ifndef ENABLE_ESP32
 #define TOKEN_LENGTH 1024
 #else
-#define TOKEN_LENGTH 256
+#define TOKEN_LENGTH 128
 #endif
 
 void config_init(Config *config, int argc, char *argv[])
