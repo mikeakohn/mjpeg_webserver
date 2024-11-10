@@ -112,7 +112,7 @@ int send_file(int id)
     {
       sprintf(temp_string,
         "\r\n--myboundary"
-        "\r\nContent-Type: image/jpeg\r\nContent-Length: %ld"
+        "\r\nContent-Type: image/jpeg\r\nContent-Length: %d"
         "\r\n\r\n",
         users[id]->content_length);
 
@@ -300,7 +300,7 @@ printf("content-length: %d\n", users[id]->content_length);
       sprintf(temp_string,
         "\r\n--myboundary"
         "\r\nContent-Type: image/jpeg"
-        "\r\nContent-Length: %ld\r\n\r\n",
+        "\r\nContent-Length: %d\r\n\r\n",
         users[id]->content_length);
 
       message(id, temp_string);

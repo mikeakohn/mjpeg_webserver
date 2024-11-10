@@ -72,7 +72,7 @@ printf("%s\n",temp);
 #endif
 
   snprintf(temp, sizeof(temp),
-    "Content-Length: %ld\r\nContent-Type: %s\r\n\r\n",
+    "Content-Length: %d\r\nContent-Type: %s\r\n\r\n",
     users[id]->content_length,
     mime_types[users[id]->mime_type]);
 
@@ -135,7 +135,7 @@ int send_header_multipart(int id)
   snprintf(temp, sizeof(temp),
     "--myboundary\r\n"
     "Content-Type: image/jpeg\r\n"
-    "Content-Length: %ld\r\n\r\n",
+    "Content-Length: %d\r\n\r\n",
     users[id]->content_length);
 
   message(id, temp);

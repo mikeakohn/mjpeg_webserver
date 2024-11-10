@@ -483,14 +483,13 @@ static int parse_capture(FILE *in)
   }
 
   memset(&video[video_count], 0, sizeof(Video));
-  video[video_count].capture_info =
-    (struct capture_info_t *)malloc(sizeof(struct capture_info_t));
+  video[video_count].capture_info = (CaptureInfo *)malloc(sizeof(CaptureInfo));
 
-  video[video_count].capture_info->width = 352;
-  video[video_count].capture_info->height = 240;
+  video[video_count].capture_info->width   = 352;
+  video[video_count].capture_info->height  = 240;
   video[video_count].capture_info->channel = -1;
 #ifdef V4L
-  video[video_count].capture_info->format = V4L2_STD_NTSC_M;
+  video[video_count].capture_info->format  = V4L2_STD_NTSC_M;
 #endif
 
   while (1)

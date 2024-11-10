@@ -36,11 +36,11 @@
 #if 0
 static struct capture_info_ptr_t
 {
-  struct capture_info_t *capture_info;
+  CaptureInfo *capture_info;
 } capture_info_ptr[MAX_CAPTURE_DEVICES];
 #endif
 
-static struct capture_info_t *capture_info_ptr[MAX_CAPTURE_DEVICES];
+static CaptureInfo *capture_info_ptr[MAX_CAPTURE_DEVICES];
 
 static int vfw_count = 0;
 
@@ -86,7 +86,7 @@ fflush(stdout);
   return 0;
 }
 
-int open_capture(struct capture_info_t *capture_info, char *dev_name)
+int open_capture(CaptureInfo *capture_info, char *dev_name)
 {
   int i;
 
@@ -95,14 +95,14 @@ int open_capture(struct capture_info_t *capture_info, char *dev_name)
     for (i = 0; i < MAX_CAPTURE_DEVICES; i++) { capture_info_ptr[i] = NULL; }
   }
 
-  // capture_info_ptr[vfw_count++] = (struct capture_info_t *)malloc(sizeof(struct capture_info_t *));
+  // capture_info_ptr[vfw_count++] = (CaptureInfo *)malloc(sizeof(CaptureInfo *));
   capture_info_ptr[vfw_count++] = capture_info;
 
 #ifdef DEBUG
 printf("width=%d height=%d\n", capture_info->width, capture_info->height);
 #endif
 
-  capture_info->hWnd=capCreateCaptureWindow(
+  capture_info->hWnd = capCreateCaptureWindow(
     "mjpeg_webserver",
     0,
     capture_info->width,
@@ -165,11 +165,11 @@ printf("capSetCallbackFrame failed: capture_info->hWnd=%d\n", capture_info->hWnd
   return 0;
 }
 
-int capture_image(struct capture_info_t *capture_info, int ID)
+int capture_image(CaptureInfo *capture_info, int id)
 {
-int count;
+  int count;
 
-  if (users[ID]->jpeg_len==0)
+  if (users[id]->jpeg_len == 0)
   {
 #ifdef DEBUG
 printf("growing jpeg buffer\n");
@@ -178,8 +178,8 @@ fflush(stdout);
 // FIXME this should be dynamic instead of wasting memory.. easy to fix
 //       also need a way to deallocate this crap
 
-    users[ID]->jpeg_len = 128000;
-    users[ID]->jpeg = (uint8_t *)malloc(users[ID]->jpeg_len);
+    users[id]->jpeg_len = 128000;
+    users[id]->jpeg = (uint8_t *)malloc(users[id]->jpeg_len);
   }
 
   capture_info->callback_wait=1;
@@ -223,12 +223,12 @@ fflush(stdout);
 printf("capture_image: exit %d %p %d %p %d  %d %d %d\n",
   count,
   capture_info->buffer,
-  video[users[ID]->video_num].capture_info->buffer_len,
-  users[ID]->jpeg,
-  users[ID]->jpeg_len,
-  video[users[ID]->video_num].capture_info->width,
-  video[users[ID]->video_num].capture_info->height,
-  users[ID]->jpeg_quality);
+  video[users[id]->video_num].capture_info->buffer_len,
+  users[id]->jpeg,
+  users[id]->jpeg_len,
+  video[users[id]->video_num].capture_info->width,
+  video[users[id]->video_num].capture_info->height,
+  users[id]->jpeg_quality);
 fflush(stdout);
 #endif
 
@@ -236,16 +236,16 @@ fflush(stdout);
 
   return jpeg_compress(
     capture_info->buffer,
-    video[users[ID]->video_num].capture_info->buffer_len,
-    users[ID]->jpeg,
-    users[ID]->jpeg_len,
-    video[users[ID]->video_num].capture_info->width,
-    video[users[ID]->video_num].capture_info->height,
+    video[users[id]->video_num].capture_info->buffer_len,
+    users[id]->jpeg,
+    users[id]->jpeg_len,
+    video[users[id]->video_num].capture_info->width,
+    video[users[id]->video_num].capture_info->height,
     3,
-    users[ID]->jpeg_quality);
+    users[id]->jpeg_quality);
 }
 
-int close_capture(struct capture_info_t *capture_info)
+int close_capture(CaptureInfo *capture_info)
 {
   SendMessage(capture_info->hWnd,WM_CAP_SET_CALLBACK_FRAME, 0, 0);
   SendMessage(capture_info->hWnd,WM_CAP_STOP, 0, 0);

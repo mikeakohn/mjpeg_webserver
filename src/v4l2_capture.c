@@ -22,7 +22,7 @@
 #include "globals.h"
 #include "jpeg_compress.h"
 
-void bgr2rgb(struct capture_info_t *capture_info)
+void bgr2rgb(CaptureInfo *capture_info)
 {
   int t, c;
 
@@ -34,7 +34,7 @@ void bgr2rgb(struct capture_info_t *capture_info)
   }
 }
 
-uint8_t *convert_yuyv(struct capture_info_t *capture_info)
+uint8_t *convert_yuyv(CaptureInfo *capture_info)
 {
   int len, ptr;
   int u, v, u1, uv1, v1, y1;
@@ -94,7 +94,7 @@ uint8_t *convert_yuyv(struct capture_info_t *capture_info)
   return capture_info->picture;
 }
 
-uint8_t *convert_bayer(struct capture_info_t *capture_info)
+uint8_t *convert_bayer(CaptureInfo *capture_info)
 {
   int x, y, c;
   int ptr;
@@ -135,7 +135,7 @@ uint8_t *convert_bayer(struct capture_info_t *capture_info)
   return capture_info->picture;
 }
 
-int open_capture(struct capture_info_t *capture_info, char *dev_name)
+int open_capture(CaptureInfo *capture_info, char *dev_name)
 {
   // char dev_name[]={"/dev/video0"};
   // char dev_name[128];
@@ -305,7 +305,7 @@ int open_capture(struct capture_info_t *capture_info, char *dev_name)
   return 0;
 }
 
-int read_frame(struct capture_info_t *capture_info, uint8_t *buffer, int len)
+int read_frame(CaptureInfo *capture_info, uint8_t *buffer, int len)
 {
   struct v4l2_buffer buf;
   int c, n;
@@ -354,14 +354,14 @@ printf("v4l2 read()=%d error.  errno=%d  buffer=%d/%d\n", n, errno, c, len);
   return c;
 }
 
-int capture_image(struct capture_info_t *capture_info, int id)
+int capture_image(CaptureInfo *capture_info, int id)
 {
   uint8_t *cap_buffer = 0;
 
   if (users[id]->jpeg_len == 0)
   {
-// FIXME this should be dynamic instead of wasting memory.. easy to fix
-//       also need a way to deallocate this crap
+    // FIXME: This should be dynamic instead of wasting memory.. easy to fix
+    // also need a way to deallocate this crap.
 
     // users[id]->jpeg_len = 20480;
     users[id]->jpeg_len = 128000;
@@ -403,7 +403,7 @@ int capture_image(struct capture_info_t *capture_info, int id)
     users[id]->jpeg_quality);
 }
 
-int close_capture(struct capture_info_t *capture_info)
+int close_capture(CaptureInfo *capture_info)
 {
   free(capture_info->buffer);
 

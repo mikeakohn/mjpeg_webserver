@@ -23,7 +23,7 @@ typedef struct Video
   struct timeval tv_start;
   struct timeval tv_total;
 #ifdef ENABLE_CAPTURE
-  struct capture_info_t *capture_info;
+  CaptureInfo *capture_info;
 #endif
 #ifdef WITH_MMAP
   long file_len;

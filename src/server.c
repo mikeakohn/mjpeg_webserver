@@ -426,14 +426,14 @@ if (debug == 1)
           file_close(users[id]);
         }
 
-        users[id]->video_num = r;
-        users[id]->need_header = NEED_HEADER_YES;
+        users[id]->video_num    = r;
+        users[id]->need_header  = NEED_HEADER_YES;
         users[id]->request_type = REQUEST_SINGLE;
-        users[id]->last_frame = -1;
-        users[id]->flags = 0;
-        users[id]->frame_rate = config->frame_rate;
+        users[id]->last_frame   = -1;
+        users[id]->flags        = 0;
+        users[id]->frame_rate   = config->frame_rate;
 #ifdef ENABLE_CAPTURE
-        users[id]->jpeg_quality = jpeg_quality;
+        users[id]->jpeg_quality = config->jpeg_quality;
 #endif
 
         if (users[id]->video_num == -1)

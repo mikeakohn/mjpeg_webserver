@@ -52,7 +52,7 @@ typedef struct User
 #endif
   int video_num;
   int mime_type;
-  long content_length;
+  int content_length;
   time_t last_modified;
   int state;
   int need_header;

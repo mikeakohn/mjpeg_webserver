@@ -22,7 +22,7 @@
 #include <vfw.h>
 #endif
 
-struct capture_info_t
+typedef struct CaptureInfo
 {
 #ifdef V4L2
   struct v4l2_capability vid_cap;
@@ -37,21 +37,24 @@ struct capture_info_t
   int jpeg_len;
   int callback_wait;
 #endif
+#ifdef ENABLE_ESP32
+  //void *request;
+#endif
   uint8_t *buffer;
   int buffer_len;
   uint8_t *picture;
   int picture_len;
-  int width,height;
+  int width, height;
   /* int convert_type; */
   int device_num; // FIXME - this should go away maybe
   int max_fps;
   int format;
   int channel;
-};
+} CaptureInfo;
 
-int open_capture(struct capture_info_t *capture_info, char *dev_name);
-int capture_image(struct capture_info_t *capture_info, int ID);
-int close_capture(struct capture_info_t *capture_info);
+int open_capture(CaptureInfo *capture_info, char *dev_name);
+int capture_image(CaptureInfo *capture_info, int id);
+int close_capture(CaptureInfo *capture_info);
 
 #endif
 
